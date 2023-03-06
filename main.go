@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
 	"github.com/nicchunglow/go-fiber-bookstore/database"
-	bookRoutes "github.com/nicchunglow/go-fiber-bookstore/routes"
+	routes "github.com/nicchunglow/go-fiber-bookstore/routes"
 )
 
-func helloWorld(c *fiber.Ctx) {
-	c.Send("Hello, World")
+func helloWorld(c *fiber.Ctx) error {
+	return c.SendString("Hello, World")
 }
 
 func InitDatabase() {
@@ -35,8 +36,8 @@ func main() {
 	app := fiber.New()
 	InitDatabase()
 	app.Get("/", helloWorld)
-	bookRoutes.SetupRoutes(app)
+	routes.SetupRoutes(app)
 	port := os.Getenv("PORT")
 	fmt.Printf("Server starting at http://localhost:%v", port)
-	app.Listen(port)
+	log.Fatal(app.Listen(":" + port))
 }

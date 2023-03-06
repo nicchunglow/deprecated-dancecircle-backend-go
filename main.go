@@ -23,11 +23,12 @@ func InitDatabase() {
 
 	dbPassword := os.Getenv("DB_PASSWORD")
 	db, err := gorm.Open("mysql", "root:"+dbPassword+"@/fiberBookStore?charset=utf8&parseTime=True&loc=Local")
-	defer db.Close()
 	if err != nil {
 		panic(err)
 	}
+
 	database.DBConn = db
+	defer database.DBConn.Close()
 	fmt.Println("Database Connected Successfully")
 }
 func main() {

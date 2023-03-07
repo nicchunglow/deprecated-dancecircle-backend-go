@@ -16,8 +16,9 @@ func helloWorld(c *fiber.Ctx) error {
 
 func SetupRoutes(app *fiber.App) {
 	app.Get("/", helloWorld)
-	app.Get("/users", routes.GetAllUsers)
 	app.Post("/users", routes.CreateUser)
+	app.Get("/users", routes.GetAllUsers)
+	app.Get("/users/:id", routes.GetUser)
 	// app.Get("/book", controllers.GetAllBooks)
 	// app.Get("/book/{id}", book.GetBook)
 	// app.Post("/book", book.NewBook)

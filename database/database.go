@@ -11,9 +11,11 @@ import (
 	"github.com/nicchunglow/go-fiber-bookstore/models"
 )
 
-var (
-	DBConnect *gorm.DB
-)
+type DbInstance struct {
+	Db *gorm.DB
+}
+
+var Database DbInstance
 
 func ConnectDb() {
 	err := godotenv.Load()
@@ -29,8 +31,7 @@ func ConnectDb() {
 	log.Println("Running Migrations")
 	db.AutoMigrate(&models.User{}, &models.Product{}, &models.Order{})
 
-	DBConnect = db
-	defer DBConnect.Close()
+	Database = DbInstance{Db: db}
 
 	fmt.Println("Database Connected Successfully")
 }

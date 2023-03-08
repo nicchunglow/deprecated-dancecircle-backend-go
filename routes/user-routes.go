@@ -2,6 +2,7 @@ package routes
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/gorm"
@@ -17,6 +18,7 @@ type User struct {
 }
 
 func CreateResponseUserMapper(userModel *models.User) User {
+	fmt.Print(userModel)
 	return User{
 		ID:        userModel.ID,
 		FirstName: userModel.FirstName,
@@ -24,35 +26,34 @@ func CreateResponseUserMapper(userModel *models.User) User {
 	}
 }
 
+func CreateResponseUser(user models.User) User {
+	return User{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName}
+}
+
 func CreateUser(c *fiber.Ctx) error {
 	DB := database.Database.Db
 	var user models.User
-	DB.Create(&user)
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(400).JSON(err.Error())
 	}
+	DB.Create(&user)
 	responseUser := CreateResponseUserMapper(&models.User{
 		ID:        user.ID,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 	})
-
 	return c.Status(200).JSON(responseUser)
 }
 
 func GetAllUsers(c *fiber.Ctx) error {
-	DB := database.Database.Db
 	users := []models.User{}
-	DB.Find(&users)
+	database.Database.Db.Find(&users)
 	responseUsers := []User{}
 	for _, user := range users {
-		responseUser := CreateResponseUserMapper(&models.User{
-			ID:        user.ID,
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-		})
+		responseUser := CreateResponseUserMapper(&user)
 		responseUsers = append(responseUsers, responseUser)
 	}
+
 	return c.JSON(responseUsers)
 }
 func GetUserById(id int) (*User, error) {

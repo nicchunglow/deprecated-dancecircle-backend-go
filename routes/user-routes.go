@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/jinzhu/gorm"
 	"github.com/nicchunglow/go-fiber-bookstore/database"
 	"github.com/nicchunglow/go-fiber-bookstore/models"
 )
@@ -24,10 +23,6 @@ func CreateResponseUserMapper(userModel *models.User) User {
 		FirstName: userModel.FirstName,
 		LastName:  userModel.LastName,
 	}
-}
-
-func CreateResponseUser(user models.User) User {
-	return User{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName}
 }
 
 func CreateUser(c *fiber.Ctx) error {
@@ -56,21 +51,12 @@ func GetAllUsers(c *fiber.Ctx) error {
 
 	return c.JSON(responseUsers)
 }
-func GetUserById(id int) (*User, error) {
-	var user models.User
-	err := database.Database.Db.First(&user, id).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("user does not exist")
-		}
-		return nil, err
+func GetUserById(id int, user *models.User) error {
+	database.Database.Db.Find(&user, "id = ?", id)
+	if user.ID == 0 {
+		return errors.New("user does not exist")
 	}
-	responseUser := CreateResponseUserMapper(&models.User{
-		ID:        user.ID,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-	})
-	return &responseUser, nil
+	return nil
 }
 
 func GetUser(c *fiber.Ctx) error {
@@ -78,11 +64,47 @@ func GetUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(400).JSON("Please ensure that :id is an integer")
 	}
+	var user models.User
 
-	user, err := GetUserById(id)
-	if err != nil {
+	if err := GetUserById(id, &user); err != nil {
 		return c.Status(400).JSON(err.Error())
 	}
 
 	return c.JSON(user)
+}
+
+func UpdateUser(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	var user models.User
+
+	if err != nil {
+		return c.Status(400).JSON("Please ensure that :id is an integer")
+	}
+
+	err = GetUserById(id, &user)
+
+	if err != nil {
+		return c.Status(400).JSON(err.Error())
+	}
+
+	type UpdateUser struct {
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+	}
+
+	var updateData UpdateUser
+
+	if err := c.BodyParser(&updateData); err != nil {
+		return c.Status(500).JSON(err.Error())
+	}
+
+	user.ID = uint(id)
+	user.FirstName = updateData.FirstName
+	user.LastName = updateData.LastName
+
+	database.Database.Db.Save(&user)
+
+	responseUser := CreateResponseUserMapper(&user)
+
+	return c.Status(200).JSON(responseUser)
 }

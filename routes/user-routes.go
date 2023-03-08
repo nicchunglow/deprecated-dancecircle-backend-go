@@ -98,7 +98,6 @@ func UpdateUser(c *fiber.Ctx) error {
 		return c.Status(500).JSON(err.Error())
 	}
 
-	user.ID = uint(id)
 	user.FirstName = updateData.FirstName
 	user.LastName = updateData.LastName
 

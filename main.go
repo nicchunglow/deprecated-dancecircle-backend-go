@@ -17,6 +17,7 @@ func helloWorld(c *fiber.Ctx) error {
 func SetupRoutes(app *fiber.App) {
 	app.Get("/", helloWorld)
 	routes.UserRoutes(app)
+	routes.ProductRoutes(app)
 }
 
 func main() {

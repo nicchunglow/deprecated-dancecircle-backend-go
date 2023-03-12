@@ -16,7 +16,7 @@ type User struct {
 	LastName  string `json:"last_name"`
 }
 
-func CreateResponseUserMapper(userModel *models.User) User {
+func CreateResponseUserMapper(userModel models.User) User {
 	fmt.Print(userModel)
 	return User{
 		ID:        userModel.ID,
@@ -32,11 +32,7 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.Status(400).JSON(err.Error())
 	}
 	DB.Create(&user)
-	responseUser := CreateResponseUserMapper(&models.User{
-		ID:        user.ID,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-	})
+	responseUser := CreateResponseUserMapper(user)
 	return c.Status(200).JSON(responseUser)
 }
 
@@ -45,7 +41,7 @@ func GetAllUsers(c *fiber.Ctx) error {
 	database.Database.Db.Find(&users)
 	responseUsers := []User{}
 	for _, user := range users {
-		responseUser := CreateResponseUserMapper(&user)
+		responseUser := CreateResponseUserMapper(user)
 		responseUsers = append(responseUsers, responseUser)
 	}
 
@@ -103,7 +99,7 @@ func UpdateUser(c *fiber.Ctx) error {
 
 	database.Database.Db.Save(&user)
 
-	responseUser := CreateResponseUserMapper(&user)
+	responseUser := CreateResponseUserMapper(user)
 
 	return c.Status(200).JSON(responseUser)
 }

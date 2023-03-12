@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	controller "github.com/nicchunglow/go-fiber-bookstore/controllers"
 	"github.com/nicchunglow/go-fiber-bookstore/database"
-	"github.com/nicchunglow/go-fiber-bookstore/routes"
 )
 
 func helloWorld(c *fiber.Ctx) error {
@@ -16,11 +16,11 @@ func helloWorld(c *fiber.Ctx) error {
 
 func SetupRoutes(app *fiber.App) {
 	app.Get("/", helloWorld)
-	app.Post("/users", routes.CreateUser)
-	app.Get("/users", routes.GetAllUsers)
-	app.Get("/users/:id", routes.GetUser)
-	app.Put("/users/:id", routes.UpdateUser)
-	app.Delete("/users/:id", routes.DeleteUser)
+	app.Post("/users", controller.CreateUser)
+	app.Get("/users", controller.GetAllUsers)
+	app.Get("/users/:id", controller.GetUser)
+	app.Put("/users/:id", controller.UpdateUser)
+	app.Delete("/users/:id", controller.DeleteUser)
 }
 
 func main() {

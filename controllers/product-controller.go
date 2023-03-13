@@ -10,7 +10,7 @@ import (
 
 type Product struct {
 	//this is the user serializer
-	ID           uint   `json:"id" gorm:"primaryKey"`
+	ID           uint   `json:"id"`
 	Name         string `json:"name"`
 	SerialNumber string `json:"serial_number"`
 }

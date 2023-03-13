@@ -7,4 +7,6 @@ import (
 
 func OrderRoutes(app *fiber.App) {
 	app.Post("/orders", controller.CreateOrder)
+	app.Get("/orders", controller.GetOrders)
+	app.Get("/orders/:id", controller.GetOrder)
 }

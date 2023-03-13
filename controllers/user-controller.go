@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/nicchunglow/go-fiber-bookstore/database"
@@ -17,7 +16,6 @@ type User struct {
 }
 
 func CreateResponseUserMapper(userModel models.User) User {
-	fmt.Print(userModel)
 	return User{
 		ID:        userModel.ID,
 		FirstName: userModel.FirstName,

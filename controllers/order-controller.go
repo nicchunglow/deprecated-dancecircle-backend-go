@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/nicchunglow/go-fiber-bookstore/database"
-	"github.com/nicchunglow/go-fiber-bookstore/models"
+	"github.com/nicchunglow/dancecircle-backend/database"
+	"github.com/nicchunglow/dancecircle-backend/models"
 )
 
 type Order struct {

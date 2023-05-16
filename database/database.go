@@ -8,7 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/joho/godotenv"
-	"github.com/nicchunglow/go-fiber-bookstore/models"
+	"github.com/nicchunglow/dancecircle-backend/models"
 )
 
 type DbInstance struct {

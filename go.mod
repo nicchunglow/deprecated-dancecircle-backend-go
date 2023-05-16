@@ -1,4 +1,4 @@
-module github.com/nicchunglow/go-fiber-bookstore
+module github.com/nicchunglow/dancecircle-backend
 
 go 1.20
 

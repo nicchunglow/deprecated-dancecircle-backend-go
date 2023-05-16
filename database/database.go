@@ -29,7 +29,7 @@ func ConnectDb() {
 		log.Fatal("Failed to connect to the database! \n", err)
 	}
 	log.Println("Running Migrations")
-	db.AutoMigrate(&models.User{}, &models.Product{}, &models.Order{})
+	db.AutoMigrate(&models.User{}, &models.Product{})
 
 	Database = DbInstance{Db: db}
 

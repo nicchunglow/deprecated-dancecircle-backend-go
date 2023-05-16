@@ -18,7 +18,6 @@ func SetupRoutes(app *fiber.App) {
 	app.Get("/", helloWorld)
 	routes.UserRoutes(app)
 	routes.ProductRoutes(app)
-	routes.OrderRoutes(app)
 }
 
 func main() {

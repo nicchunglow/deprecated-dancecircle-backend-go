@@ -5,8 +5,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
 	"github.com/nicchunglow/dancecircle-backend/models"
 )
@@ -22,9 +25,15 @@ func ConnectDb() {
 	if err != nil {
 		log.Fatal("Failed to load env! \n", err)
 	}
-
-	dbPassword := os.Getenv("DB_PASSWORD")
-	db, err := gorm.Open("mysql", "root:"+dbPassword+"@/fiberBookStore?charset=utf8&parseTime=True&loc=Local")
+	dsn := fmt.Sprintf(
+		"host=localhost user=%s password=%s dbname=%s port=5432 sslmode=disable",
+		"test-user",
+		os.Getenv("DB_PASSWORD"),
+		"testdb",
+	)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	   })
 	if err != nil {
 		log.Fatal("Failed to connect to the database! \n", err)
 	}

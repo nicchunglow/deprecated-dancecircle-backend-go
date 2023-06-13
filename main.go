@@ -24,7 +24,9 @@ func main() {
 	app := fiber.New()
 	database.ConnectDb()
 	SetupRoutes(app)
+	fmt.Printf("Routes set.")
 	port := os.Getenv("PORT")
+
 	fmt.Printf("Server starting at http://localhost:%v", port)
 	log.Fatal(app.Listen(":" + port))
 }

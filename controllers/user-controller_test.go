@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -27,7 +28,7 @@ func TestGetAllUsers(t *testing.T) {
 		AddRow(1, "John", "Doe").
 		AddRow(2, "Jane", "Smith")
 
-	mock.ExpectQuery("SELECT * FROM users").WillReturnRows(rows)
+	mock.ExpectQuery(`SELECT \* FROM "users"`).WillReturnRows(rows)
 
 	app := fiber.New()
 	app.Get("/users", GetAllUsers)
@@ -37,4 +38,8 @@ func TestGetAllUsers(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	body, err := ioutil.ReadAll(resp.Body)
+
+	expectedBody := `[{"id":1,"first_name":"John","last_name":"Doe"},{"id":2,"first_name":"Jane","last_name":"Smith"}]`
+	assert.Equal(t, expectedBody, string(body))
 }

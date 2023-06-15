@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -24,9 +25,17 @@ func TestGetAllUsers(t *testing.T) {
 
 	database.Database.Db = gormDB
 
-	rows := sqlmock.NewRows([]string{"id", "first_name", "last_name"}).
-		AddRow(1, "John", "Doe").
-		AddRow(2, "Jane", "Smith")
+	users := []User{
+		{ID: 1, FirstName: "John", LastName: "Doe"},
+		{ID: 2, FirstName: "Jane", LastName: "Smith"},
+	}
+
+	columns := []string{"id", "first_name", "last_name"}
+
+	rows := sqlmock.NewRows(columns)
+	for _, user := range users {
+		rows.AddRow(user.ID, user.FirstName, user.LastName)
+	}
 
 	mock.ExpectQuery(`SELECT \* FROM "users"`).WillReturnRows(rows)
 
@@ -40,6 +49,8 @@ func TestGetAllUsers(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	body, err := ioutil.ReadAll(resp.Body)
 
-	expectedBody := `[{"id":1,"first_name":"John","last_name":"Doe"},{"id":2,"first_name":"Jane","last_name":"Smith"}]`
+	expectedBodyBytes, _ := json.Marshal(users)
+	expectedBody := string(expectedBodyBytes)
+
 	assert.Equal(t, expectedBody, string(body))
 }

@@ -2,55 +2,49 @@ package controller
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nicchunglow/dancecircle-backend/database"
+	"github.com/nicchunglow/dancecircle-backend/models"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
-func TestGetAllUsers(t *testing.T) {
-	db, mock, _ := sqlmock.New()
-	defer db.Close()
+type MockUserRepository struct{}
 
-	gormDB, _ := gorm.Open(postgres.New(postgres.Config{
-		Conn: db,
-	}), &gorm.Config{})
-
-	database.Database.Db = gormDB
-
-	users := []User{
+func (m *MockUserRepository) GetAll() ([]models.User, error) {
+	// Mock implementation to return sample users
+	mockUsers := []models.User{
 		{ID: 1, FirstName: "John", LastName: "Doe"},
-		{ID: 2, FirstName: "Jane", LastName: "Smith"},
+		{ID: 2, FirstName: "JohnJohn", LastName: "Doey"},
 	}
+	return mockUsers, nil
+}
 
-	columns := []string{"id", "first_name", "last_name"}
-
-	rows := sqlmock.NewRows(columns)
-	for _, user := range users {
-		rows.AddRow(user.ID, user.FirstName, user.LastName)
-	}
-
-	mock.ExpectQuery(`SELECT \* FROM "users"`).WillReturnRows(rows)
-
+func TestGetAllUsers(t *testing.T) {
+	userController := UserController(&MockUserRepository{})
 	app := fiber.New()
-	app.Get("/users", GetAllUsers)
+	app.Get("/users", userController.GetAllUsers)
 
 	req := httptest.NewRequest(http.MethodGet, "/users", nil)
 	resp, err := app.Test(req)
+	assert.NoError(t, err)
+	defer resp.Body.Close()
 
-	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	body, err := ioutil.ReadAll(resp.Body)
 
-	expectedBodyBytes, _ := json.Marshal(users)
-	expectedBody := string(expectedBodyBytes)
+	var responseUsers []User
+	err = json.NewDecoder(resp.Body).Decode(&responseUsers)
+	assert.NoError(t, err)
 
-	assert.Equal(t, expectedBody, string(body))
+	assert.Len(t, responseUsers, 2)
+
+	assert.Equal(t, uint(1), responseUsers[0].ID)
+	assert.Equal(t, "John", responseUsers[0].FirstName)
+	assert.Equal(t, "Doe", responseUsers[0].LastName)
+
+	assert.Equal(t, uint(2), responseUsers[1].ID)
+	assert.Equal(t, "JohnJohn", responseUsers[1].FirstName)
+	assert.Equal(t, "Doey", responseUsers[1].LastName)
 }

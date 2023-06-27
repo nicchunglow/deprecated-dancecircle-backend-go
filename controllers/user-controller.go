@@ -9,10 +9,17 @@ import (
 )
 
 type User struct {
-	//this is the user serializer
 	ID        uint   `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
+}
+
+type UserRepository interface {
+	GetAll() ([]models.User, error)
+}
+
+type UserControllerType struct {
+	UserRepo UserRepository
 }
 
 func CreateResponseUserMapper(userModel models.User) User {
@@ -23,28 +30,27 @@ func CreateResponseUserMapper(userModel models.User) User {
 	}
 }
 
-func CreateUser(c *fiber.Ctx) error {
-	DB := database.Database.Db
-	var user models.User
-	if err := c.BodyParser(&user); err != nil {
-		return c.Status(400).JSON(err.Error())
+func UserController(userRepo UserRepository) *UserControllerType {
+	return &UserControllerType{
+		UserRepo: userRepo,
 	}
-	DB.Create(&user)
-	responseUser := CreateResponseUserMapper(user)
-	return c.Status(200).JSON(responseUser)
 }
 
-func GetAllUsers(c *fiber.Ctx) error {
-	users := []models.User{}
-	database.Database.Db.Find(&users)
-	responseUsers := []User{}
+func (c *UserControllerType) GetAllUsers(ctx *fiber.Ctx) error {
+	users, err := c.UserRepo.GetAll()
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+
+	responseUsers := make([]User, 0, len(users))
 	for _, user := range users {
 		responseUser := CreateResponseUserMapper(user)
 		responseUsers = append(responseUsers, responseUser)
 	}
 
-	return c.JSON(responseUsers)
+	return ctx.JSON(responseUsers)
 }
+
 func GetUserById(id int, user *models.User) error {
 	database.Database.Db.Find(&user, "id = ?", id)
 	if user.ID == 0 {

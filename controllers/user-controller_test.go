@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 
 	"github.com/gofiber/fiber/v2"
 	controller "github.com/nicchunglow/dancecircle-backend/controllers"
 	"github.com/nicchunglow/dancecircle-backend/models"
-	"github.com/stretchr/testify/assert"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 )
 
 type MockUserRepository struct{}
@@ -23,29 +23,39 @@ func (m *MockUserRepository) GetAll() ([]models.User, error) {
 	return mockUsers, nil
 }
 
-func TestGetAllUsers(t *testing.T) {
-	userController := controller.UserController(&MockUserRepository{})
-	app := fiber.New()
-	app.Get("/users", userController.GetAllUsers)
+var _ = ginkgo.Describe("UserController", func() {
+	var (
+		mockUserRepository *MockUserRepository
+		app                *fiber.App
+	)
 
-	req := httptest.NewRequest(http.MethodGet, "/users", nil)
-	resp, err := app.Test(req)
-	assert.NoError(t, err)
-	defer resp.Body.Close()
+	ginkgo.BeforeEach(func() {
+		mockUserRepository = &MockUserRepository{}
+		userController := controller.UserController(mockUserRepository)
+		app = fiber.New()
+		app.Get("/users", userController.GetAllUsers)
+	})
 
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	ginkgo.It("should return all users", func() {
+		req := httptest.NewRequest(http.MethodGet, "/users", nil)
+		resp, err := app.Test(req)
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
+		defer resp.Body.Close()
 
-	var responseUsers []controller.User
-	err = json.NewDecoder(resp.Body).Decode(&responseUsers)
-	assert.NoError(t, err)
+		gomega.Expect(resp.StatusCode).To(gomega.Equal(http.StatusOK))
 
-	assert.Len(t, responseUsers, 2)
+		var responseUsers []controller.User
+		err = json.NewDecoder(resp.Body).Decode(&responseUsers)
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
-	assert.Equal(t, uint(1), responseUsers[0].ID)
-	assert.Equal(t, "John", responseUsers[0].FirstName)
-	assert.Equal(t, "Doe", responseUsers[0].LastName)
+		gomega.Expect(responseUsers).To(gomega.HaveLen(2))
 
-	assert.Equal(t, uint(2), responseUsers[1].ID)
-	assert.Equal(t, "JohnJohn", responseUsers[1].FirstName)
-	assert.Equal(t, "Doey", responseUsers[1].LastName)
-}
+		gomega.Expect(responseUsers[0].ID).To(gomega.Equal(uint(1)))
+		gomega.Expect(responseUsers[0].FirstName).To(gomega.Equal("John"))
+		gomega.Expect(responseUsers[0].LastName).To(gomega.Equal("Doe"))
+
+		gomega.Expect(responseUsers[1].ID).To(gomega.Equal(uint(2)))
+		gomega.Expect(responseUsers[1].FirstName).To(gomega.Equal("JohnJohn"))
+		gomega.Expect(responseUsers[1].LastName).To(gomega.Equal("Doey"))
+	})
+})

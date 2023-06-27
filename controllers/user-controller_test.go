@@ -1,4 +1,4 @@
-package controller
+package controller_test
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
+	controller "github.com/nicchunglow/dancecircle-backend/controllers"
 	"github.com/nicchunglow/dancecircle-backend/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +24,7 @@ func (m *MockUserRepository) GetAll() ([]models.User, error) {
 }
 
 func TestGetAllUsers(t *testing.T) {
-	userController := UserController(&MockUserRepository{})
+	userController := controller.UserController(&MockUserRepository{})
 	app := fiber.New()
 	app.Get("/users", userController.GetAllUsers)
 
@@ -34,7 +35,7 @@ func TestGetAllUsers(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	var responseUsers []User
+	var responseUsers []controller.User
 	err = json.NewDecoder(resp.Body).Decode(&responseUsers)
 	assert.NoError(t, err)
 

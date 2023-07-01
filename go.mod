@@ -3,7 +3,6 @@ module github.com/nicchunglow/dancecircle-backend
 go 1.20
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/jinzhu/gorm v1.9.16
 	gorm.io/gorm v1.25.1
 )

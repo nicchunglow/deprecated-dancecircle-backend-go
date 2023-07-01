@@ -8,15 +8,8 @@ import (
 	"github.com/nicchunglow/dancecircle-backend/models"
 )
 
-type User struct {
-	//this is the user serializer
-	ID        uint   `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-}
-
-func CreateResponseUserMapper(userModel models.User) User {
-	return User{
+func CreateResponseUserMapper(userModel models.User) models.UserResponse {
+	return models.UserResponse{
 		ID:        userModel.ID,
 		FirstName: userModel.FirstName,
 		LastName:  userModel.LastName,
@@ -37,7 +30,7 @@ func CreateUser(c *fiber.Ctx) error {
 func GetAllUsers(c *fiber.Ctx) error {
 	users := []models.User{}
 	database.Database.Db.Find(&users)
-	responseUsers := []User{}
+	responseUsers := []models.UserResponse{}
 	for _, user := range users {
 		responseUser := CreateResponseUserMapper(user)
 		responseUsers = append(responseUsers, responseUser)

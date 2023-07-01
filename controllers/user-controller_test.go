@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/nicchunglow/dancecircle-backend/models"
+	models "github.com/nicchunglow/dancecircle-backend/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -18,9 +18,9 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) GetAll() ([]User, error) {
+func (m *MockUserRepository) GetAll() ([]models.UserResponse, error) {
 	args := m.Called()
-	return args.Get(0).([]User), args.Error(1)
+	return args.Get(0).([]models.UserResponse), args.Error(1)
 }
 
 func (m *MockUserRepository) CreateUser(user models.User) error {
@@ -32,7 +32,7 @@ func TestGetAllUsers(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	defer mockRepo.AssertExpectations(t)
 
-	users := []User{
+	users := []models.UserResponse{
 		{ID: 1, FirstName: "John", LastName: "Doe"},
 		{ID: 2, FirstName: "Jane", LastName: "Smith"},
 	}
@@ -113,4 +113,18 @@ func TestCreateUser(t *testing.T) {
 
 	// Assert that the response status code is 200 OK
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	// Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	assert.Nil(t, err)
+
+	// Unmarshal the response body to a response user object
+	var responseUser models.UserResponse
+	err = json.Unmarshal(body, &responseUser)
+	assert.Nil(t, err)
+
+	// Assert that the response user matches the expected user
+	expectedResponseUser := CreateResponseUserMapper(user)
+	assert.Equal(t, expectedResponseUser.ID, responseUser.ID)
+	assert.Equal(t, expectedResponseUser.FirstName, responseUser.FirstName)
+	assert.Equal(t, expectedResponseUser.LastName, responseUser.LastName)
 }

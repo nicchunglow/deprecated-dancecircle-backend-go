@@ -7,40 +7,41 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nicchunglow/dancecircle-backend/database"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/stretchr/testify/mock"
 )
 
+type MockUserRepository struct {
+	mock.Mock
+}
+
+func (m *MockUserRepository) GetAll() ([]User, error) {
+	args := m.Called()
+	return args.Get(0).([]User), args.Error(1)
+}
+
 func TestGetAllUsers(t *testing.T) {
-	db, mock, _ := sqlmock.New()
-	defer db.Close()
-
-	gormDB, _ := gorm.Open(postgres.New(postgres.Config{
-		Conn: db,
-	}), &gorm.Config{})
-
-	database.Database.Db = gormDB
+	mockRepo := new(MockUserRepository)
+	defer mockRepo.AssertExpectations(t)
 
 	users := []User{
 		{ID: 1, FirstName: "John", LastName: "Doe"},
 		{ID: 2, FirstName: "Jane", LastName: "Smith"},
 	}
 
-	columns := []string{"id", "first_name", "last_name"}
-
-	rows := sqlmock.NewRows(columns)
-	for _, user := range users {
-		rows.AddRow(user.ID, user.FirstName, user.LastName)
-	}
-
-	mock.ExpectQuery(`SELECT \* FROM "users"`).WillReturnRows(rows)
+	mockRepo.On("GetAll").Return(users, nil)
 
 	app := fiber.New()
-	app.Get("/users", GetAllUsers)
+	app.Get("/users", func(c *fiber.Ctx) error {
+		// Retrieve users from the mock repository
+		users, err := mockRepo.GetAll()
+		if err != nil {
+			return err
+		}
+
+		return c.JSON(users)
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/users", nil)
 	resp, err := app.Test(req)

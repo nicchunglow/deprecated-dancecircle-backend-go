@@ -1,4 +1,3 @@
-inpackage: True
-testonly: True
-with-expecter: True
-keeptree: False
+inpackage: True 
+with-expecter: True 
+testonly: True 

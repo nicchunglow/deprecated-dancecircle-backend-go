@@ -8,6 +8,15 @@ import (
 	"github.com/nicchunglow/dancecircle-backend/models"
 )
 
+//go:generate mockery --name=UserController
+type UserController interface {
+	CreateUser(c *fiber.Ctx) error
+	GetAllUsers(c *fiber.Ctx) error
+	GetUser(c *fiber.Ctx) error
+	UpdateUser(c *fiber.Ctx) error
+	DeleteUser(c *fiber.Ctx) error
+}
+
 func CreateResponseUserMapper(userModel models.User) models.UserResponse {
 	return models.UserResponse{
 		ID:        userModel.ID,

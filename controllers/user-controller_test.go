@@ -3,7 +3,7 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -55,7 +55,7 @@ func TestGetAllUsers(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 
 	expectedBodyBytes, _ := json.Marshal(users)
 	expectedBody := string(expectedBodyBytes)
@@ -95,34 +95,26 @@ func TestCreateUser(t *testing.T) {
 		LastName:  "Doe",
 	}
 
-	// Create a request body with the user JSON
 	userJSON, _ := json.Marshal(user)
 
-	// Create a POST request to the /users endpoint with the user JSON
 	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(userJSON))
 
-	// Set the request Content-Type header to application/json
 	req.Header.Set("Content-Type", "application/json")
 
-	// Set up the mock repository response
 	mockRepo.On("CreateUser", user).Return(nil)
 
-	// Perform the request
 	resp, err := app.Test(req)
 	assert.Nil(t, err)
 
-	// Assert that the response status code is 200 OK
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	// Read the response body
-	body, err := ioutil.ReadAll(resp.Body)
+
+	body, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err)
 
-	// Unmarshal the response body to a response user object
 	var responseUser models.UserResponse
 	err = json.Unmarshal(body, &responseUser)
 	assert.Nil(t, err)
 
-	// Assert that the response user matches the expected user
 	expectedResponseUser := CreateResponseUserMapper(user)
 	assert.Equal(t, expectedResponseUser.ID, responseUser.ID)
 	assert.Equal(t, expectedResponseUser.FirstName, responseUser.FirstName)

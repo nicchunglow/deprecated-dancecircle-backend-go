@@ -3,7 +3,7 @@
 package controller
 
 import (
-	models "github.com/nicchunglow/dancecircle-backend/models"
+	models "github.com/nicchunglow/dancecircle-backend-go/models"
 	mock "github.com/stretchr/testify/mock"
 )
 

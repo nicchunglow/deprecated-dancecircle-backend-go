@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/nicchunglow/dancecircle-backend/database"
-	"github.com/nicchunglow/dancecircle-backend/routes"
+	"github.com/nicchunglow/dancecircle-backend-go/database"
+	"github.com/nicchunglow/dancecircle-backend-go/routes"
 )
 
 func helloWorld(c *fiber.Ctx) error {

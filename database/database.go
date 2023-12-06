@@ -11,7 +11,7 @@ import (
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
-	"github.com/nicchunglow/dancecircle-backend/models"
+	"github.com/nicchunglow/dancecircle-backend-go/models"
 )
 
 type DbInstance struct {
@@ -26,10 +26,11 @@ func ConnectDb() {
 		log.Fatal("Failed to load env! \n", err)
 	}
 	dsn := fmt.Sprintf(
-		"host=localhost user=%s password=%s dbname=%s port=5432 sslmode=disable",
-		"test-user",
+		"host=%s user=%s password=%s dbname=%s port=5432 sslmode=disable",
+		os.Getenv("HOST"),
+		os.Getenv("USER"),
 		os.Getenv("DB_PASSWORD"),
-		"testdb",
+		os.Getenv("DB_NAME"),
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),

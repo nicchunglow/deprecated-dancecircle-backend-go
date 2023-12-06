@@ -1,4 +1,4 @@
-module github.com/nicchunglow/dancecircle-backend
+module github.com/nicchunglow/dancecircle-backend-go
 
 go 1.20
 

@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	controller "github.com/nicchunglow/dancecircle-backend/controllers"
+	controller "github.com/nicchunglow/dancecircle-backend-go/controllers"
 )
 
 func ProductRoutes(app *fiber.App) {

@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/nicchunglow/dancecircle-backend/database"
-	"github.com/nicchunglow/dancecircle-backend/models"
+	"github.com/nicchunglow/dancecircle-backend-go/database"
+	"github.com/nicchunglow/dancecircle-backend-go/models"
 )
 
 type User struct {

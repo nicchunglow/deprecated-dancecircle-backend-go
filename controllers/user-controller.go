@@ -2,11 +2,23 @@ package controller
 
 import (
 	"errors"
+	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/nicchunglow/dancecircle-backend-go/database"
 	"github.com/nicchunglow/dancecircle-backend-go/models"
 )
+
+type UserRepositoryInterface interface {
+	GetAllUsers() ([]models.UserResponse, error)
+	CreateUser(user models.User) error
+	UpdateUser(user models.User) error
+}
+
+type UpdateUserType struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
 
 func CreateResponseUserMapper(userModel models.User) models.UserResponse {
 	return models.UserResponse{
@@ -74,12 +86,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		return c.Status(400).JSON(err.Error())
 	}
 
-	type UpdateUser struct {
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-	}
-
-	var updateData UpdateUser
+	var updateData UpdateUserType
 
 	if err := c.BodyParser(&updateData); err != nil {
 		return c.Status(500).JSON(err.Error())
@@ -92,7 +99,7 @@ func UpdateUser(c *fiber.Ctx) error {
 
 	responseUser := CreateResponseUserMapper(user)
 
-	return c.Status(200).JSON(responseUser)
+	return c.Status(http.StatusOK).JSON(responseUser)
 }
 
 func DeleteUser(c *fiber.Ctx) error {

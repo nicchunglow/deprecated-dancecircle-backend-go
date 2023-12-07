@@ -1,4 +1,4 @@
-package controller
+package controller_test
 
 import (
 	"bytes"
@@ -9,7 +9,9 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
+	userController "github.com/nicchunglow/dancecircle-backend-go/controllers"
 	models "github.com/nicchunglow/dancecircle-backend-go/models"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -41,7 +43,6 @@ func TestGetAllUsers(t *testing.T) {
 
 	app := fiber.New()
 	app.Get("/users", func(c *fiber.Ctx) error {
-		// Retrieve users from the mock repository
 		users, err := mockRepo.GetAll()
 		if err != nil {
 			return err
@@ -63,14 +64,12 @@ func TestGetAllUsers(t *testing.T) {
 	assert.Equal(t, expectedBody, string(body))
 }
 
-func TestCreateUser(t *testing.T) {
+func TestCreateUser_Error(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	defer mockRepo.AssertExpectations(t)
 
-	// Create a new Fiber app instance
 	app := fiber.New()
 
-	// Define a route for creating a user
 	app.Post("/users", func(c *fiber.Ctx) error {
 		var user models.User
 		err := c.BodyParser(&user)
@@ -78,17 +77,46 @@ func TestCreateUser(t *testing.T) {
 			return c.Status(http.StatusBadRequest).JSON(err.Error())
 		}
 
-		// Call the mock repository's CreateUser method
 		err = mockRepo.CreateUser(user)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(err.Error())
 		}
 
-		responseUser := CreateResponseUserMapper(user)
+		responseUser := userController.CreateResponseUserMapper(user)
 		return c.Status(http.StatusOK).JSON(responseUser)
 	})
 
-	// Create a test user object
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer([]byte("invalid json")))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := app.Test(req)
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+}
+
+func TestCreateUser(t *testing.T) {
+	mockRepo := new(MockUserRepository)
+	defer mockRepo.AssertExpectations(t)
+
+	app := fiber.New()
+
+	app.Post("/users", func(c *fiber.Ctx) error {
+		var user models.User
+		err := c.BodyParser(&user)
+		if err != nil {
+			return c.Status(http.StatusBadRequest).JSON(err.Error())
+		}
+
+		err = mockRepo.CreateUser(user)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(err.Error())
+		}
+
+		responseUser := userController.CreateResponseUserMapper(user)
+		return c.Status(http.StatusOK).JSON(responseUser)
+	})
+
 	user := models.User{
 		ID:        1,
 		FirstName: "John",
@@ -115,7 +143,7 @@ func TestCreateUser(t *testing.T) {
 	err = json.Unmarshal(body, &responseUser)
 	assert.Nil(t, err)
 
-	expectedResponseUser := CreateResponseUserMapper(user)
+	expectedResponseUser := userController.CreateResponseUserMapper(user)
 	assert.Equal(t, expectedResponseUser.ID, responseUser.ID)
 	assert.Equal(t, expectedResponseUser.FirstName, responseUser.FirstName)
 	assert.Equal(t, expectedResponseUser.LastName, responseUser.LastName)
